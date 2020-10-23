@@ -7,6 +7,7 @@ import logging
 import numpy as np 
 import json
 import ast
+import pandas as import pd
 
 ### 0. do setup ###
 
@@ -181,7 +182,7 @@ for single_name in tqdm(names.keys()):
 
 ### 4. do comparisons with previous version and separate missings ###
 
-f = open("./output.csv", "r")
+f = open("output.csv", "r")
 pl_names = f.read().split('\n')
 pl_names_full = {}
 for single_name in pl_names[1:]:
@@ -202,8 +203,41 @@ for single_name in list(names):
 
 ### 5. save files ###
 
-with open('./output_missing.json', 'w') as fp:
+with open('output_missing.json', 'w') as fp:
     json.dump(unknown_names, fp)
 
-with open('./output.json', 'w') as fp:
+with open('output.json', 'w') as fp:
     json.dump(names, fp)
+
+# conversion to nested csv
+names_df = pd.DataFrame().from_dict(names, orient='index').rename(columns={'lat': 'declination_json_lat', 'pl': 'declination_json_pl'})
+names_df['name'] = names_df.index
+names_df.reset_index(level=0, inplace=True)
+names_df = names_df.drop(columns='index')
+names_df = names_df[['name', 'sex', 'declination_json_pl', 'declination_json_lat']]
+names_df.to_csv('output_pd_nested.csv')
+
+# conversion to unnested csv
+temp_lang_cases = None
+for single_lang_column in names_df.columns[-2:]:
+    names_cases = names_df[single_lang_column].apply(pd.Series)
+    temp_cases = None
+    for single_column in names_cases:
+        temp_df = names_cases[single_column].apply(pd.Series).reset_index().rename(columns={'index':'name_id'}).drop(columns=0)
+        singular = temp_df[['name_id', 's']].rename(columns={'s':single_column})
+        singular['category'] = 's'
+        plural = temp_df[['name_id', 'pl']].rename(columns={'pl':single_column})
+        plural['category'] = 'pl'
+        joined_case_df = singular.append(plural)
+        if temp_cases is None:
+            temp_cases = joined_case_df[[joined_case_df.columns[i] for i in [0,2,1]]]
+        else:
+            temp_cases = pd.merge(temp_cases, joined_case_df, on=['name_id', 'category'], how='left')
+    if temp_lang_cases is None:
+        temp_lang_cases = temp_cases
+    else:
+        temp_lang_cases = pd.merge(temp_lang_cases, temp_cases, on=['name_id', 'category'], how='left')
+
+names_df['name_id'] = names_df.index
+names_df_wide = pd.merge(names_df[['name', 'sex', 'name_id']], temp_lang_cases, on=['name_id'], how='left').drop(columns='name_id')
+names_df_wide.to_csv('/home/azawalich/datascience/imiona-polskie-deklinacja/output_pd_wide.csv')
