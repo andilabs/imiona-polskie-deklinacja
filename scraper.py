@@ -197,6 +197,9 @@ for single_name in pl_names[1:]:
 # see what names are missing from original file
 list(set(list(pl_names_full.keys())) - set(list(names.keys())))
 
+# see new names in comparison to original file
+list(set(list(names.keys())) - set(list(pl_names_full.keys())))
+
 unknown_names = {}
 for single_name in list(names):
     if names[single_name] in [None, 
@@ -241,9 +244,10 @@ for single_lang_column in names_df.columns[-2:]:
 
 names_df['name_id'] = names_df.index
 names_df_wide = pd.merge(names_df[['name', 'sex', 'name_id']], temp_lang_cases, on=['name_id'], how='left').drop(columns='name_id')
+missings_wide = names_df_wide[names_df_wide.isna().any(axis=1)]
+names_df_wide = names_df_wide[~names_df_wide.isna().any(axis=1)]
 names_df_wide.to_csv('output_pd_wide.csv')
 
-missings_wide = names_df_wide[names_df_wide.isna().any(axis=1)]
 missings_wide_female_row = missings_wide[missings_wide['sex'] == 'f'].head(1)
 missings_wide_male_row = missings_wide[missings_wide['sex'] == 'm'].head(1)
 
