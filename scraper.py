@@ -274,6 +274,6 @@ for single_name in unknown_males:
         missings_wide_male_row['name'] = single_name
         missings_wide = missings_wide.append(missings_wide_male_row)
 
-missings_wide = missings_wide.sort_values(['sex', 'name', 'category'], ascending = [True, True, False])
+missings_wide = missings_wide.sort_values(['sex', 'name', 'category'], ascending = [True, True, False]).reset_index().drop(columns='index')
 missings_wide.to_csv('missings_pd_wide.csv')
 
