@@ -7,7 +7,7 @@ import logging
 import numpy as np 
 import json
 import ast
-import pandas as import pd
+import pandas as pd
 
 ### 0. do setup ###
 
@@ -240,4 +240,4 @@ for single_lang_column in names_df.columns[-2:]:
 
 names_df['name_id'] = names_df.index
 names_df_wide = pd.merge(names_df[['name', 'sex', 'name_id']], temp_lang_cases, on=['name_id'], how='left').drop(columns='name_id')
-names_df_wide.to_csv('/home/azawalich/datascience/imiona-polskie-deklinacja/output_pd_wide.csv')
+names_df_wide.to_csv('output_pd_wide.csv')
