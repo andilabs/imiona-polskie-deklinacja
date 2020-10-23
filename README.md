@@ -5,23 +5,12 @@ odmiana polskich imion 🇵🇱💁‍♀️💁‍♂️
 collected that info to make people life easier in generating in automated way nicely personalized messages with proper declination of polish names.
 
 ## files structure:
-* wiki_scraper.py - Python file with Wikipedia Dictionary scraping code, 
+* scraper.py - Python file with Wikipedia Dictionary scraping code, 
 * output.csv - csv with double-quoted declintation in both Latin/Polish forms,
-* output_pd.csv - csv with pandas-friendly encoding of declination in both Latin/Polish forms,
+* output_pd_nested.csv - nested csv with pandas-friendly encoding of declination in both Latin/Polish forms,
+* output_pd_wide.csv - wide csv with pandas-friendly encoding of declination in both Latin/Polish forms,
 * output.json - json with raw declination dictionary in both Latin/Polish forms,
 * output_missing.json - json with raw dictionary of names missing declination forms (it would be nice to fill these gaps).
-
-### with following collumns:
-`name,sex,declination_json,declination_json_pl`
-
-* `name` - singular in nominativus (pl. Mianownik - kto co?)
-* `sex` - sex (either `m` for male or `f` for female)
-* `declination_json_pl` - in double quotes (Polish form)
-* `declination_json_lat` - in double quotes (Latin form)
-
-
-### example record:
-`Andrzej,m,"{"nominativus": {"s": "Andrzej", "pl": "Andrzejowie"}, "genetivus": {"s": "Andrzeja", "pl": "Andrzej\u00f3w"}, "dativus": {"s": "Andrzejowi", "pl": "Andrzejom"}, "accusativus": {"s": "Andrzeja", "pl": "Andrzej\u00f3w"}, "instrumentalis": {"s": "Andrzejem", "pl": "Andrzejami"}, "locativus": {"s": "Andrzeju", "pl": "Andrzejach"}, "vocativus": {"s": "Andrzeju", "pl": "Andrzejowie"}}"`
 
 ### the Latin json has following structure:
 * for each of the cases (latin names) info about proper form for `s` singular and `pl` plural is provided.
