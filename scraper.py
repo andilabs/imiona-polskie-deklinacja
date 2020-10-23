@@ -37,6 +37,7 @@ for single_link in tqdm(links):
             names[single_link.text] = single_link.get_attribute('href')
         else:
             names[single_link.text] = None
+    time.sleep(0.5)
 
 ### 2. get name cases ###
 # multiple-gender names (e.g. Andrea / Maria) will occur only once, with the first appearing gender
@@ -193,19 +194,19 @@ for single_name in pl_names[1:]:
         forms_dict[single_key] = forms_dict[single_key]['s']
     pl_names_full[temp[0]] = forms_dict
 
-comp_missing_names = list(set(list(pl_names_full.keys()))  - set(list(names.keys())))
+# see what names are missing from original file
+list(set(list(pl_names_full.keys())) - set(list(names.keys())))
 
 unknown_names = {}
 for single_name in list(names):
-    if names[single_name] in [None, {'sex': None, 'pl': None, 'lat': None}] or 'http' in names[single_name]:
+    if names[single_name] in [None, 
+    {'sex': None, 'pl': None, 'lat': None}, 
+    {'sex': 'm', 'pl': None, 'lat': None}, 
+    {'sex': 'f', 'pl': None, 'lat': None}] or 'http' in names[single_name]:
         unknown_names[single_name] = None
         del names[single_name]
 
 ### 5. save files ###
-
-with open('output_missing.json', 'w') as fp:
-    json.dump(unknown_names, fp)
-
 with open('output.json', 'w') as fp:
     json.dump(names, fp)
 
@@ -223,7 +224,7 @@ for single_lang_column in names_df.columns[-2:]:
     names_cases = names_df[single_lang_column].apply(pd.Series)
     temp_cases = None
     for single_column in names_cases:
-        temp_df = names_cases[single_column].apply(pd.Series).reset_index().rename(columns={'index':'name_id'}).drop(columns=0)
+        temp_df = names_cases[single_column].apply(pd.Series).reset_index().rename(columns={'index':'name_id'})
         singular = temp_df[['name_id', 's']].rename(columns={'s':single_column})
         singular['category'] = 's'
         plural = temp_df[['name_id', 'pl']].rename(columns={'pl':single_column})
@@ -241,3 +242,38 @@ for single_lang_column in names_df.columns[-2:]:
 names_df['name_id'] = names_df.index
 names_df_wide = pd.merge(names_df[['name', 'sex', 'name_id']], temp_lang_cases, on=['name_id'], how='left').drop(columns='name_id')
 names_df_wide.to_csv('output_pd_wide.csv')
+
+missings_wide = names_df_wide[names_df_wide.isna().any(axis=1)]
+missings_wide_female_row = missings_wide[missings_wide['sex'] == 'f'].head(1)
+missings_wide_male_row = missings_wide[missings_wide['sex'] == 'm'].head(1)
+
+unknown_first_male_indeks = None
+for single_indeks in range(0, len(list(unknown_names.keys()))):
+    if list(unknown_names.keys())[single_indeks][0] == 'Ż' and list(unknown_names.keys())[single_indeks+1][0] == 'A':
+        unknown_first_male_indeks = single_indeks+1
+        break
+
+unknown_females = list(unknown_names.keys())[0:unknown_first_male_indeks]
+unknown_males = list(unknown_names.keys())[unknown_first_male_indeks:]
+
+for single_name in unknown_females:
+    for indeks in range(0,2):
+        if indeks == 0:
+            missings_wide_female_row['category'] = 's'
+        else:
+            missings_wide_female_row['category'] = 'pl'
+        missings_wide_female_row['name'] = single_name
+        missings_wide = missings_wide.append(missings_wide_female_row)
+
+for single_name in unknown_males:
+    for indeks in range(0,2):
+        if indeks == 0:
+            missings_wide_female_row['category'] = 's'
+        else:
+            missings_wide_female_row['category'] = 'pl'
+        missings_wide_male_row['name'] = single_name
+        missings_wide = missings_wide.append(missings_wide_male_row)
+
+missings_wide = missings_wide.sort_values(['sex', 'name', 'category'], ascending = [True, True, False])
+missings_wide.to_csv('missings_pd_wide.csv')
+
