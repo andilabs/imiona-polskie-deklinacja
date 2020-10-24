@@ -234,7 +234,7 @@ names_df['name_id'] = names_df.index
 names_df_wide = pd.merge(names_df[['name', 'sex', 'name_id']], temp_lang_cases, on=['name_id'], how='left').drop(columns='name_id')
 missings_wide = names_df_wide[names_df_wide.isna().any(axis=1)]
 names_df_wide = names_df_wide[~names_df_wide.isna().any(axis=1)]
-names_df_wide.to_csv('output_pd_wide.csv')
+names_df_wide.to_csv('output_wide.csv')
 
 missings_wide_female_row = missings_wide[missings_wide['sex'] == 'f'].head(1)
 missings_wide_male_row = missings_wide[missings_wide['sex'] == 'm'].head(1)
@@ -254,4 +254,4 @@ for single_name in list(unknown_names.keys())[::-1]:
         missings_wide = missings_wide.append(double_row)
 
 missings_wide = missings_wide.sort_values(['sex', 'name', 'category'], ascending = [True, True, False]).reset_index().drop(columns='index')
-missings_wide.to_csv('missings_pd_wide.csv')
+missings_wide.to_csv('missings_wide.csv')

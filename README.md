@@ -7,9 +7,9 @@ collected that info to make people life easier in generating in automated way ni
 ## files structure:
 * scraper.py - Python file with Wikipedia Dictionary scraping code, 
 * output.csv - nested csv with pandas-friendly encoding of declination in both Latin/Polish forms,
-* output_pd_wide.csv - wide csv with pandas-friendly encoding of declination in both Latin/Polish forms,
+* output_wide.csv - wide csv with pandas-friendly encoding of declination in both Latin/Polish forms,
 * output.json - json with raw declination dictionary in both Latin/Polish forms,
-* missings_pd_wide.csv - wide csv with pandas-friendly encoding of missing declination in both Latin/Polish forms (it would be nice to fill these gaps),
+* missings_wide.csv - wide csv with pandas-friendly encoding of missing declination in both Latin/Polish forms (it would be nice to fill these gaps),
 * changelog.md - Markdown file with list of changes to repository, 
 * README.md - readme file with repository description.
 
