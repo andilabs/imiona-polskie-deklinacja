@@ -1,3 +1,8 @@
+# v1.2.1
+## Changed
+- replaced [output.csv]() file with previous [output_pd_wide.csv]() file (that has the same structure and does not break file loading)
+- deleted duplicated `output_pd_wide.csv` file
+
 # v1.2
 ## Added 
 - submitted changelog file `changelog.md`

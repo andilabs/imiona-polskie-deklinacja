@@ -232,7 +232,7 @@ names_df['name'] = names_df.index
 names_df.reset_index(level=0, inplace=True)
 names_df = names_df.drop(columns='index')
 names_df = names_df[['name', 'sex', 'declination_json_pl', 'declination_json_lat']]
-names_df.to_csv('output_pd_nested.csv')
+names_df.to_csv('output.csv')
 
 # conversion to unnested csv
 temp_lang_cases = None
