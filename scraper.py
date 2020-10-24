@@ -186,28 +186,41 @@ for single_name in tqdm(names.keys()):
 f = open("output.csv", "r")
 pl_names = f.read().split('\n')
 pl_names_full = {}
+reversed_cases = dict(zip(cases_in_latin.values(),cases_in_latin.keys()))
 for single_name in pl_names[1:]:
     temp = single_name.split(',')
     replaced_dict = ''.join(temp[2:])[1:-1].replace('" "', '", "').replace('} ', '}, ').replace('null', '""')
-    forms_dict = ast.literal_eval(replaced_dict)
-    for single_key in forms_dict.keys():
-        forms_dict[single_key] = forms_dict[single_key]['s']
-    pl_names_full[temp[0]] = forms_dict
+    if replaced_dict != '':
+        forms_dict = ast.literal_eval(replaced_dict)
+        good_form_dict = {
+            'sex': temp[1],
+            'pl': {},
+            'lat': {}
+        }
+        for single_key in forms_dict.keys():
+            good_form_dict['pl'][reversed_cases[single_key]] = forms_dict[single_key]
+        good_form_dict['lat'] = forms_dict
+        pl_names_full[temp[0]] = good_form_dict
 
-# see what names are missing from original file
-list(set(list(pl_names_full.keys())) - set(list(names.keys())))
-
-# see new names in comparison to original file
-list(set(list(names.keys())) - set(list(pl_names_full.keys())))
-
+sex = 'm'
 unknown_names = {}
-for single_name in list(names):
+for single_indeks in range(len(list(names.keys()))-1, -1, -1):
+    single_name = list(names.keys())[single_indeks]
+    if single_name[0] == 'A' and list(names.keys())[single_indeks-1][0] == 'Ż' and sex == 'm':
+        sex = 'f'
+    
     if names[single_name] in [None, 
     {'sex': None, 'pl': None, 'lat': None}, 
     {'sex': 'm', 'pl': None, 'lat': None}, 
     {'sex': 'f', 'pl': None, 'lat': None}] or 'http' in names[single_name]:
-        unknown_names[single_name] = None
+        unknown_names[single_name] = {'sex': sex}
         del names[single_name]
+
+original_missing_names = list(set(list(pl_names_full.keys())) - set(list(names.keys())))
+original_missing_names_cases = { your_key: pl_names_full[your_key] for your_key in original_missing_names }
+
+# see new names in comparison to original file
+list(set(list(names.keys())) - set(list(pl_names_full.keys())))
 
 ### 5. save files ###
 with open('output.json', 'w') as fp:
@@ -251,33 +264,19 @@ names_df_wide.to_csv('output_pd_wide.csv')
 missings_wide_female_row = missings_wide[missings_wide['sex'] == 'f'].head(1)
 missings_wide_male_row = missings_wide[missings_wide['sex'] == 'm'].head(1)
 
-unknown_first_male_indeks = None
-for single_indeks in range(0, len(list(unknown_names.keys()))):
-    if list(unknown_names.keys())[single_indeks][0] == 'Ż' and list(unknown_names.keys())[single_indeks+1][0] == 'A':
-        unknown_first_male_indeks = single_indeks+1
-        break
-
-unknown_females = list(unknown_names.keys())[0:unknown_first_male_indeks]
-unknown_males = list(unknown_names.keys())[unknown_first_male_indeks:]
-
-for single_name in unknown_females:
+for single_name in list(unknown_names.keys())[::-1]:
+    if unknown_names[single_name]['sex'] == 'f':
+        double_row = missings_wide_female_row
+    else:
+        double_row = missings_wide_male_row
+    
     for indeks in range(0,2):
         if indeks == 0:
-            missings_wide_female_row['category'] = 's'
+            double_row['category'] = 's'
         else:
-            missings_wide_female_row['category'] = 'pl'
-        missings_wide_female_row['name'] = single_name
-        missings_wide = missings_wide.append(missings_wide_female_row)
-
-for single_name in unknown_males:
-    for indeks in range(0,2):
-        if indeks == 0:
-            missings_wide_female_row['category'] = 's'
-        else:
-            missings_wide_female_row['category'] = 'pl'
-        missings_wide_male_row['name'] = single_name
-        missings_wide = missings_wide.append(missings_wide_male_row)
+            double_row['category'] = 'pl'
+        double_row['name'] = single_name
+        missings_wide = missings_wide.append(double_row)
 
 missings_wide = missings_wide.sort_values(['sex', 'name', 'category'], ascending = [True, True, False]).reset_index().drop(columns='index')
 missings_wide.to_csv('missings_pd_wide.csv')
-
