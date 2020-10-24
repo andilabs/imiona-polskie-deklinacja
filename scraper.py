@@ -181,26 +181,7 @@ for single_name in tqdm(names.keys()):
     else:
         logging.warning('{} no name entry exists at all'.format(single_name))
 
-### 4. do comparisons with previous version and separate missings ###
-
-f = open("output.csv", "r")
-pl_names = f.read().split('\n')
-pl_names_full = {}
-reversed_cases = dict(zip(cases_in_latin.values(),cases_in_latin.keys()))
-for single_name in pl_names[1:]:
-    temp = single_name.split(',')
-    replaced_dict = ''.join(temp[2:])[1:-1].replace('" "', '", "').replace('} ', '}, ').replace('null', '""')
-    if replaced_dict != '':
-        forms_dict = ast.literal_eval(replaced_dict)
-        good_form_dict = {
-            'sex': temp[1],
-            'pl': {},
-            'lat': {}
-        }
-        for single_key in forms_dict.keys():
-            good_form_dict['pl'][reversed_cases[single_key]] = forms_dict[single_key]
-        good_form_dict['lat'] = forms_dict
-        pl_names_full[temp[0]] = good_form_dict
+### 4. separate missings ###
 
 sex = 'm'
 unknown_names = {}
@@ -215,12 +196,6 @@ for single_indeks in range(len(list(names.keys()))-1, -1, -1):
     {'sex': 'f', 'pl': None, 'lat': None}] or 'http' in names[single_name]:
         unknown_names[single_name] = {'sex': sex}
         del names[single_name]
-
-original_missing_names = list(set(list(pl_names_full.keys())) - set(list(names.keys())))
-original_missing_names_cases = { your_key: pl_names_full[your_key] for your_key in original_missing_names }
-
-# see new names in comparison to original file
-list(set(list(names.keys())) - set(list(pl_names_full.keys())))
 
 ### 5. save files ###
 with open('output.json', 'w') as fp:
