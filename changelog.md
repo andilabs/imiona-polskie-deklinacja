@@ -1,3 +1,12 @@
+# v1.3
+## Added
+- added new data source to `scraper.py`: [imiona.info](http://imiona.info)
+- added incomplete cases warning to Wiktionary `scraper.py` section
+
+## Changed
+- extended corpus with singular declination form for 534 previously unknown names (~92% more)
+- updated json/csv files accordingly
+
 # v1.2.1
 ## Changed
 - replaced [output.csv](https://github.com/azawalich/imiona-polskie-deklinacja/blob/v1.2/output.csv) file with previous [output_pd_wide.csv](https://github.com/azawalich/imiona-polskie-deklinacja/blob/v1.2/output_pd_wide.csv) file (that has the same structure and does not break file loading)
