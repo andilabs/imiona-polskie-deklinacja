@@ -134,6 +134,8 @@ for single_name in tqdm(names.keys()):
                             cases_range = 3
                         # there could be less than 7 cases, therefore len in range
                         temp_dict_pl, temp_dict_latin = [{}, {}]
+                        if len(data_cells) < 7:
+                            logging.warning('{} incomplete cases'.format(single_name))
                         for indeks in range(0, len(data_cells), cases_range):
                             single_row = data_cells[indeks:indeks+cases_range]
                             # if there are actual proper cases (and not any merged column)
@@ -197,7 +199,59 @@ for single_indeks in range(len(list(names.keys()))-1, -1, -1):
         unknown_names[single_name] = {'sex': sex}
         del names[single_name]
 
-### 5. save files ###
+unknown_names_to_delete = []
+### 5. check missing names with another page ### 
+driver = webdriver.Chrome()
+for single_name in tqdm(unknown_names.keys()):
+    which_to_take = None
+    driver.get('http://www.imiona.info/odmiana_{}'.format(single_name))
+    time.sleep(1)
+    error_page = driver.find_elements_by_css_selector('.error-number')
+    if len(error_page) == 0:
+        desired_sex = unknown_names[single_name]['sex']
+        cases_box = driver.find_elements_by_css_selector('.list-unstyled')
+        if len(cases_box) > 0:
+            page_sex = driver.find_elements_by_css_selector('.x_title')[0].text
+            if (re.search('Imię żeńskie', page_sex) is not None and desired_sex == 'f') or (re.search('Imię męskie', page_sex) is not None and desired_sex == 'm'):
+                which_to_take = 0
+            elif len(cases_box) > 1:
+                # there are more than one sexes - the one that interests us is second on the list
+                which_to_take = 1
+                logging.warning('{} second on the list'.format(single_name))
+            else:
+                # there is a sex mismatch, still take the first one and change previous sex
+                which_to_take = 0
+                new_sex = 'f'
+                if desired_sex == 'f':
+                    new_sex = 'm'                   
+                unknown_names[single_name]['sex'] = desired_sex
+                logging.warning('{} sex type mismatch, changed from {} to {}'.format(single_name, desired_sex, new_sex))
+        else:
+            which_to_take = ''
+            logging.warning('{} no name entry exists'.format(single_name))
+        if which_to_take not in [None, '']:
+            cases = cases_box[0].find_elements_by_css_selector('.title')
+            if len(cases) < 7:
+                logging.warning('{} incomplete cases'.format(single_name)) 
+            temp_dict = unknown_names[single_name]
+            temp_dict['pl'], temp_dict['lat'] = [{}, {}]
+            # there could be less than 7 cases, therefore len in range
+            for single_indeks in range(0, len(cases)):
+                temp_dict['pl'][list(cases_in_latin.keys())[single_indeks]],\
+                    temp_dict['lat'][list(cases_in_latin.values())[single_indeks]] = [
+                        {'s': cases[single_indeks].text, 'pl': None}, {'s': cases[single_indeks].text, 'pl': None}]
+            names[single_name] = temp_dict
+            unknown_names_to_delete.append(single_name)
+            logging.warning('{} name found'.format(single_name))
+        elif which_to_take is None:
+            logging.warning('{} weird error'.format(single_name))
+    else:
+        logging.warning('{} no name entry exists at all'.format(single_name)) 
+
+for single_key in unknown_names_to_delete:
+    del unknown_names[single_key]
+
+### 6. save files ###
 with open('output.json', 'w') as fp:
     json.dump(names, fp)
 
