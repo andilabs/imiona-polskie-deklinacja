@@ -287,7 +287,7 @@ for single_lang_column in names_df.columns[-2:]:
 names_df['name_id'] = names_df.index
 names_df_wide = pd.merge(names_df[['name', 'sex', 'name_id']], temp_lang_cases, on=['name_id'], how='left').drop(columns='name_id')
 missings_wide = names_df_wide[names_df_wide.isna().any(axis=1)]
-names_df_wide = names_df_wide[~names_df_wide.isna().any(axis=1)]
+names_df_wide = names_df_wide[~names_df_wide.isna().any(axis=1)].sort_values(['sex', 'name', 'category'], ascending = [True, True, False]).reset_index().drop(columns='index')
 names_df_wide.to_csv('output_wide.csv')
 
 missings_wide_female_row = missings_wide[missings_wide['sex'] == 'f'].head(1)
