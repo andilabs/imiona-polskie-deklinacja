@@ -16,6 +16,9 @@ collected that info to make people life easier in generating in automated way ni
 * `changelog.md` - Markdown file with list of changes to repository, 
 * `README.md` - readme file with repository description.
 
+## Usage:
+Before running the repository code on your machine with `python3 scraper.py`, you have to install Chrome WebDriver for Selenium. You might find all relevant infromation about it [on Selenium website](https://selenium-python.readthedocs.io/installation.html).
+
 ## References:
 - [Wikipedia Dictionary of Polish Names](https://pl.wiktionary.org/wiki/Indeks:Polski_-_Imiona) (as well as following name pages), 
 - [Wikipedia on: Polish declension of nouns](https://en.wikipedia.org/wiki/Polish_grammar#Declension), 
