@@ -8,6 +8,7 @@ import numpy as np
 import json
 import ast
 import pandas as pd
+from utils.save_files import save_names_files
 
 ### 0. do setup ###
 
@@ -37,7 +38,6 @@ for single_link in tqdm(links):
             names[single_link.text] = single_link.get_attribute('href')
         else:
             names[single_link.text] = None
-    time.sleep(0.5)
 
 ### 2. get name cases ###
 # multiple-gender names (e.g. Andrea / Maria) will occur only once, with the first appearing gender
@@ -252,5 +252,4 @@ for single_key in unknown_names_to_delete:
     del unknown_names[single_key]
 
 ### 6. save files ###
-from utils.save_files import save_names_files
 save_names_files(names, './data', unknown_names)
